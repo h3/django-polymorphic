@@ -224,7 +224,7 @@ class PolymorphicParentModelAdmin(admin.ModelAdmin):
         ct_id = int(request.GET.get('ct_id', 0))
         if not ct_id:
             # Display choices
-            return self.add_type_view(request)
+            return self.add_type_view(request, extra_context=extra_context)
         else:
             real_admin = self._get_real_admin_by_ct(ct_id)
             # rebuild form_url, otherwise libraries below will override it.
@@ -352,7 +352,7 @@ class PolymorphicParentModelAdmin(admin.ModelAdmin):
 
         return resolvermatch.func(request, *resolvermatch.args, **resolvermatch.kwargs)
 
-    def add_type_view(self, request, form_url=''):
+    def add_type_view(self, request, form_url='', extra_context=None):
         """
         Display a choice form to select which page type to add.
         """
@@ -382,7 +382,6 @@ class PolymorphicParentModelAdmin(admin.ModelAdmin):
         adminForm = AdminForm(form, fieldsets, {}, model_admin=self)
         media = self.media + adminForm.media
         opts = self.model._meta
-
         context = {
             'title': _('Add %s') % force_text(opts.verbose_name),
             'adminform': adminForm,
@@ -392,6 +391,8 @@ class PolymorphicParentModelAdmin(admin.ModelAdmin):
             'errors': AdminErrorList(form, ()),
             'app_label': opts.app_label,
         }
+        if extra_context:
+            context.update(extra_context)
         return self.render_add_type_form(request, context, form_url)
 
     def render_add_type_form(self, request, context, form_url=''):
